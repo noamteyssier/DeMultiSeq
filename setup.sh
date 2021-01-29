@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 # installs cargo if not found
-if [ ! hash cargo ]; then
+if ! hash cargo ; then
   curl https://sh.rustup.rs -sSf | sh
 fi
 
 # build bin directory
-if [ ! -d "bin/"]; then
+if [ ! -d "bin/" ]; then
   mkdir bin/
 fi
 
