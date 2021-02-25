@@ -12,7 +12,8 @@ use clap::{Arg, App};
 #[derive (Default)]
 struct DeMultiSeq {
     data : HashMap<String, HashMap<String, HashSet<String>>>,
-    tolerance : u8
+    tolerance : u8,
+    barcode_size: u32
 }
 impl DeMultiSeq {
 
@@ -89,7 +90,7 @@ impl DeMultiSeq {
         */
 
         let mut chars = seq.chars();
-        let multiseq:String = self.char_slice(&mut chars, 8);
+        let multiseq:String = self.char_slice(&mut chars, self.barcode_size);
         return multiseq
     }
 
@@ -317,6 +318,15 @@ fn main() {
                 .takes_value(true)
                 .default_value("0")
             )
+        .arg(
+            Arg::with_name("multiseq_barcode_size")
+                .short("s")
+                .long("size")
+                .value_name("multiseq_barcode_size")
+                .help("Size of multiseq barcode to extract from R2 (default = 8)")
+                .takes_value(true)
+                .default_value("8")
+        )
         .get_matches();
 
     let r1 = matches.value_of("r1").unwrap();
@@ -324,6 +334,7 @@ fn main() {
     let fn_cell_barcodes = matches.value_of("cell_barcodes").unwrap();
     let fn_ms_barcodes = matches.value_of("multiseq_barcodes").unwrap();
     let tolerance = matches.value_of("tolerance").unwrap().parse::<u8>().unwrap();
+    let barcode_size = matches.value_of("multiseq_barcode_size").unwrap().parse::<u32>().unwrap();
 
     let mut cbs = BarcodeSet::default();
     let _cbs_parse_result = cbs.parse(fn_cell_barcodes);
@@ -331,7 +342,10 @@ fn main() {
     let mut mbs = BarcodeSet::default();
     let _mbs_parse_result = mbs.parse(fn_ms_barcodes);
 
-    let mut dms = DeMultiSeq {tolerance, ..Default::default()};
+    let mut dms = DeMultiSeq {
+        tolerance,
+        barcode_size,
+        ..Default::default()};
     let _dms_result = dms.run(r1, r2, &cbs, &mbs);
     dms.pprint();
 }
